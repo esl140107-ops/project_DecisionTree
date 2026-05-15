@@ -3,10 +3,10 @@
 #include "dataset.h"
 #include "decision_tree.h"
 #include "visualization.h"
-#include <windows.h> // Добавлено для работы с кодировками консоли
+#include <windows.h> 
 
 int main(int argc, char **argv) {
-    // Включаем поддержку кодировки UTF-8 в консоли Windows
+    //включаем поддержку кодировки UTF-8 в консоли Windows
     SetConsoleOutputCP(CP_UTF8);
 
     if (argc < 4) {
