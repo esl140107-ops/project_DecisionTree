@@ -1,7 +1,3 @@
-# =============================================================
-# ФИНАЛЬНЫЙ MAKEFILE (WINDOWS + VS CODE AUTO-OPEN) - V3
-# =============================================================
-
 # Настройки компилятора
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -O3 -Iinclude
@@ -12,7 +8,7 @@ SRC = src/main.c src/dataset.c src/decision_tree.c src/visualization.c
 OBJ = $(SRC:.c=.o)
 TARGET = cart_app.exe
 
-# --- Основные правила сборки ---
+# Основные правила сборки 
 
 all: $(TARGET)
 
@@ -33,7 +29,7 @@ test_all: iris diabetes house
 	@echo =========================================================
 	@echo.
 
-# --- Индивидуальные тесты ---
+#Индивидуальные тесты
 
 iris: $(TARGET)
 	@echo.
@@ -56,7 +52,7 @@ house: $(TARGET)
 	-dot -Tpng tree.dot -o tree_house.png
 	-code tree_house.png
 
-# --- Очистка (Исправлено для Windows) ---
+#Очистка
 
 clean:
 	@echo [Clean] Removing temporary files and artifacts...
