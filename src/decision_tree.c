@@ -5,14 +5,7 @@
 
 #define EPSILON 1e-9
 
-/* ========================================================================= */
-/* 1. СТРУКТУРЫ УТИЛИТ И СОРТИРОВКА                                          */
-/* ========================================================================= */
-
-/**
- * @struct Subset
- * @brief Хранит индексы текущего узла для избежания копирования данных.
- */
+/* 1. СТРУКТУРЫ УТИЛИТ И СОРТИРОВКА   */
 typedef struct {
     int *indices;
     int size;
@@ -37,10 +30,6 @@ static int compare_items(const void *a, const void *b) {
     if (v1 > v2) return 1;
     return 0;
 }
-
-/* ========================================================================= */
-/* 2. МАТЕМАТИКА ИМПЬЮРИТИ (ЗАГРЯЗНЕННОСТИ)                                  */
-/* ========================================================================= */
 
 static double calc_gini_from_counts(const int *counts, int num_classes, int total) {
     if (total == 0) return 0.0;
@@ -72,10 +61,6 @@ static double calc_mse_from_sums(double sum, double sq_sum, int total) {
     double variance = (sq_sum / total) - (mean * mean);
     return variance > 0 ? variance : 0.0;
 }
-
-/* ========================================================================= */
-/* 3. ОПТИМИЗИРОВАННЫЙ ПОИСК РАЗБИЕНИЯ O(N log N)                            */
-/* ========================================================================= */
 
 /**
  * @brief Поиск лучшего сплита для задачи классификации (Gini / Entropy).
@@ -182,10 +167,6 @@ static void find_best_split_regression(
 
     free(items);
 }
-
-/* ========================================================================= */
-/* 4. РЕКУРСИВНОЕ ПОСТРОЕНИЕ ДЕРЕВА (CART)                                   */
-/* ========================================================================= */
 
 static double get_leaf_prediction(const Dataset *d, Subset *s, TaskType task, int n_classes) {
     if (task == TASK_REGRESSION) {
@@ -323,11 +304,6 @@ double predict(const TreeModel *model, const double *features) {
     }
     return node->predicted_value;
 }
-
-/* ========================================================================= */
-/* 5. ОТЧЕТЫ И МЕТРИКИ                                                       */
-/* ========================================================================= */
-
 void print_feature_importances(const TreeModel *model) {
     printf("\n--- Важность признаков (Feature Importances) ---\n");
     for (int i = 0; i < model->n_features; i++) {
@@ -407,10 +383,6 @@ void print_regression_report(const TreeModel *model, const Dataset *data) {
     printf("MAE (Mean Absolute Error): %.4f\n", mae);
     printf("R^2 Score (Детерминация) : %.4f\n", r2);
 }
-
-/* ========================================================================= */
-/* 6. ОЧИСТКА ПАМЯТИ                                                         */
-/* ========================================================================= */
 
 static void free_tree_node(TreeNode *node) {
     if (!node) return;
