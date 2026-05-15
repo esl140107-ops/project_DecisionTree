@@ -1,14 +1,14 @@
-# Настройки компилятора
+#настройки компилятора
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -O3 -Iinclude
 LDFLAGS = -lm
 
-# Структура проекта
+#структура проекта
 SRC = src/main.c src/dataset.c src/decision_tree.c src/visualization.c
 OBJ = $(SRC:.c=.o)
 TARGET = cart_app.exe
 
-# Основные правила сборки 
+#основные правила сборки 
 
 all: $(TARGET)
 
@@ -20,7 +20,7 @@ $(TARGET): $(OBJ)
 	@echo [Compile] Compiling source file: $<...
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# --- ГЛОБАЛЬНЫЙ ТЕСТ (ЗАПУСК ВСЕГО ПАКЕТА) ---
+# Запуск всей программы
 
 test_all: iris diabetes house
 	@echo.
@@ -29,7 +29,7 @@ test_all: iris diabetes house
 	@echo =========================================================
 	@echo.
 
-#Индивидуальные тесты
+#индивидуальные тесты
 
 iris: $(TARGET)
 	@echo.
@@ -52,7 +52,7 @@ house: $(TARGET)
 	-dot -Tpng tree.dot -o tree_house.png
 	-code tree_house.png
 
-#Очистка
+#очистка
 
 clean:
 	@echo [Clean] Removing temporary files and artifacts...

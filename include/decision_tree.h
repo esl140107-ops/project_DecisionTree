@@ -15,13 +15,13 @@ typedef enum { CRITERION_GINI, CRITERION_ENTROPY, CRITERION_MSE } Criterion;
  * @brief Структура узла дерева (рекурсивная)
  */
 typedef struct TreeNode {
-    int feature_index;
-    double threshold;
+    int feature_index;  //признак разделения
+    double threshold;  //знач для разделения
     struct TreeNode *left;
     struct TreeNode *right;
     bool is_leaf;
     double predicted_value;
-    int num_samples;
+    int num_samples;  //колво объектов в узле
     double impurity;
 } TreeNode;
 
@@ -31,17 +31,17 @@ typedef struct TreeNode {
  */
 typedef struct {
     TreeNode *root;
-    TaskType task;
+    TaskType task;  //тип задачи(классификация/регрессия)
     Criterion criterion;
     int max_depth;
     int min_samples_split;
-    int n_features;
+    int n_features; //колво признаков данных
     int n_classes;               /**< Используется только для классификации */
     double *feature_importances; /**< Массив важности признаков */
 } TreeModel;
 
 TreeModel* build_tree_model(Dataset *data, int max_depth, int min_samples, TaskType task, Criterion crit);
-double predict(const TreeModel *model, const double *features);
+double predict(const TreeModel *model, const double *features);  //предсказ знач для объекта
 
 void print_classification_report(const TreeModel *model, const Dataset *data);
 void print_regression_report(const TreeModel *model, const Dataset *data);

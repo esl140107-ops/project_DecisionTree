@@ -7,7 +7,7 @@
 
 /* 1. СТРУКТУРЫ УТИЛИТ И СОРТИРОВКА   */
 typedef struct {
-    int *indices;
+    int *indices;  //мас индексов
     int size;
 } Subset;
 
@@ -16,7 +16,7 @@ typedef struct {
  * @brief Хранит пару "Значение признака - Исходный индекс" для Quicksort.
  */
 typedef struct {
-    double value;
+    double value;  //знач признака
     int index;
 } SortItem;
 
@@ -31,6 +31,7 @@ static int compare_items(const void *a, const void *b) {
     return 0;
 }
 
+//индекс Джини по массиву количества объектов каждого класса
 static double calc_gini_from_counts(const int *counts, int num_classes, int total) {
     if (total == 0) return 0.0;
     double gini = 1.0;
@@ -43,6 +44,7 @@ static double calc_gini_from_counts(const int *counts, int num_classes, int tota
     return gini;
 }
 
+//энтропия по массиву количества объектов каждого класса
 static double calc_entropy_from_counts(const int *counts, int num_classes, int total) {
     if (total == 0) return 0.0;
     double entropy = 0.0;
@@ -55,6 +57,7 @@ static double calc_entropy_from_counts(const int *counts, int num_classes, int t
     return entropy;
 }
 
+//среднеквадратичная ошибка (MSE) для регрессии
 static double calc_mse_from_sums(double sum, double sq_sum, int total) {
     if (total == 0) return 0.0;
     double mean = sum / total;
@@ -79,13 +82,14 @@ static void find_best_split_classification(
     int *left_counts = (int*)calloc(n_classes, sizeof(int));
     int *right_counts = (int*)calloc(n_classes, sizeof(int));
     
-    // Инициализация правой гистограммы всеми элементами узла
+    //инициализация правой гистограммы всеми элементами узла
     for (int i = 0; i < s->size; i++) {
         right_counts[(int)d->targets[items[i].index]]++;
     }
 
     int left_size = 0, right_size = s->size;
     
+    //перебираем возможные точки разделения
     for (int i = 0; i < s->size - 1; i++) {
         int c = (int)d->targets[items[i].index];
         left_counts[c]++;
@@ -125,6 +129,7 @@ static void find_best_split_regression(
     const Dataset *d, Subset *s, int f_idx,
     double cur_imp, double *best_drop, int *best_f, double *best_t) 
 {
+    //создаем и сортируем массив
     SortItem *items = (SortItem*)malloc(s->size * sizeof(SortItem));
     for (int i = 0; i < s->size; i++) {
         items[i].value = d->features[s->indices[i]][f_idx];
@@ -135,7 +140,7 @@ static void find_best_split_regression(
     double left_sum = 0, left_sq_sum = 0;
     double right_sum = 0, right_sq_sum = 0;
 
-    // Изначально всё в правой ветви
+    //изначально всё в правой ветви
     for (int i = 0; i < s->size; i++) {
         double v = d->targets[items[i].index];
         right_sum += v;
@@ -144,6 +149,7 @@ static void find_best_split_regression(
 
     int left_size = 0, right_size = s->size;
     
+    //перебираем точки разделения
     for (int i = 0; i < s->size - 1; i++) {
         double v = d->targets[items[i].index];
         left_sum += v; left_sq_sum += v * v;
@@ -168,6 +174,7 @@ static void find_best_split_regression(
     free(items);
 }
 
+//вычисление предсказания для листового узла
 static double get_leaf_prediction(const Dataset *d, Subset *s, TaskType task, int n_classes) {
     if (task == TASK_REGRESSION) {
         double sum = 0;
@@ -188,11 +195,12 @@ static double get_leaf_prediction(const Dataset *d, Subset *s, TaskType task, in
     }
 }
 
+//рекурсивная функция построения дерева
 static TreeNode* build_tree_recursive(TreeModel *model, const Dataset *d, Subset *s, int depth) {
     TreeNode *node = (TreeNode*)calloc(1, sizeof(TreeNode));
     node->num_samples = s->size;
 
-    // Вычисляем примесь (Impurity) текущего узла
+    //вычисляем примесь (Impurity) текущего узла
     if (model->task == TASK_REGRESSION) {
         double sum = 0, sq_sum = 0;
         for (int i = 0; i < s->size; i++) {
@@ -209,7 +217,7 @@ static TreeNode* build_tree_recursive(TreeModel *model, const Dataset *d, Subset
         free(counts);
     }
 
-    // Базовые условия остановки
+    //базовые условия остановки
     if (depth >= model->max_depth || s->size < model->min_samples_split || node->impurity < EPSILON) {
         node->is_leaf = true;
         node->predicted_value = get_leaf_prediction(d, s, model->task, model->n_classes);
@@ -220,7 +228,7 @@ static TreeNode* build_tree_recursive(TreeModel *model, const Dataset *d, Subset
     double best_t = 0.0;
     double best_drop = -1.0;
 
-    // Перебор признаков
+    //перебор признаков
     for (int f = 0; f < d->num_cols; f++) {
         if (model->task == TASK_CLASSIFICATION) {
             find_best_split_classification(d, s, f, model->criterion, model->n_classes, 
@@ -230,20 +238,20 @@ static TreeNode* build_tree_recursive(TreeModel *model, const Dataset *d, Subset
         }
     }
 
-    // Если не удалось улучшить узел - делаем листом
+    //если не удалось улучшить узел - делаем листом
     if (best_f == -1 || best_drop <= 0) {
         node->is_leaf = true;
         node->predicted_value = get_leaf_prediction(d, s, model->task, model->n_classes);
         return node;
     }
 
-    // Обновляем важность признака
+    //обновляем важность признака
     model->feature_importances[best_f] += (best_drop * s->size) / d->num_rows;
 
     node->feature_index = best_f;
     node->threshold = best_t;
 
-    // Физическое разделение массива индексов
+    //физическое разделение массива индексов
     Subset sl = { (int*)malloc(s->size * sizeof(int)), 0 };
     Subset sr = { (int*)malloc(s->size * sizeof(int)), 0 };
 
@@ -261,6 +269,7 @@ static TreeNode* build_tree_recursive(TreeModel *model, const Dataset *d, Subset
     return node;
 }
 
+//главная функция для построения модели
 TreeModel* build_tree_model(Dataset *data, int max_depth, int min_samples, TaskType task, Criterion crit) {
     if (!data || data->num_rows == 0) return NULL;
 
@@ -280,13 +289,14 @@ TreeModel* build_tree_model(Dataset *data, int max_depth, int min_samples, TaskT
         model->n_classes = max_c + 1;
     }
 
+    //создаем корневое подмножество, включающее все данные
     Subset root_sub = { (int*)malloc(data->num_rows * sizeof(int)), data->num_rows };
     for (int i = 0; i < data->num_rows; i++) root_sub.indices[i] = i;
 
     model->root = build_tree_recursive(model, data, &root_sub, 0);
     free(root_sub.indices);
 
-    // Нормализация Feature Importances (сумма = 1.0)
+    //нормализация Feature Importances 
     double sum_imp = 0;
     for (int i = 0; i < model->n_features; i++) sum_imp += model->feature_importances[i];
     if (sum_imp > EPSILON) {
@@ -296,6 +306,7 @@ TreeModel* build_tree_model(Dataset *data, int max_depth, int min_samples, TaskT
     return model;
 }
 
+//функция для предсказания значения для одного объекта
 double predict(const TreeModel *model, const double *features) {
     const TreeNode *node = model->root;
     while (!node->is_leaf) {
@@ -311,13 +322,13 @@ void print_feature_importances(const TreeModel *model) {
     }
     printf("------------------------------------------------\n");
 }
-
+//вывод отчета по классификации
 void print_classification_report(const TreeModel *model, const Dataset *data) {
     int correct = 0;
     int **cm = (int**)malloc(model->n_classes * sizeof(int*));
     for (int i = 0; i < model->n_classes; i++) cm[i] = (int*)calloc(model->n_classes, sizeof(int));
 
-    // Для бинарной классификации
+    //для бинарной классификации
     int tp = 0, fp = 0, fn = 0, tn = 0;
 
     for (int i = 0; i < data->num_rows; i++) {

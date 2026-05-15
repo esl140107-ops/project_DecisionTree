@@ -3,6 +3,7 @@
 
 static int _node_id = 0;
 
+//рекурсивная функция для генерации описания узлов и связей
 static void _dot_recursive(const TreeNode *node, FILE *f, int id, TaskType task) {
     if (!node) return;
     
@@ -28,7 +29,7 @@ static void _dot_recursive(const TreeNode *node, FILE *f, int id, TaskType task)
         fprintf(f, "  n%d -> n%d [label=\"Нет\", color=\"#e6550d\", penwidth=1.5];\n", id, right_id);
     }
 }
-
+//функция для экспорта дерева 
 void export_tree_to_dot(const TreeModel *model, const char *filename) {
     if (!model || !model->root) return;
     FILE *f = fopen(filename, "w");

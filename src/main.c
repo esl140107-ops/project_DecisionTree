@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
     char task_char = argv[3][0];
     char crit_char = (argc > 4) ? argv[4][0] : 'g';
 
+    //определение типа задачи и критерия на основе символов
     TaskType task = (task_char == 'r') ? TASK_REGRESSION : TASK_CLASSIFICATION;
     Criterion crit = CRITERION_GINI;
     if (crit_char == 'e') crit = CRITERION_ENTROPY;

@@ -9,14 +9,14 @@ Dataset* load_csv(const char *filename, int has_header) {
     }
 
     char line[8192];
-    int rows = 0;
-    int cols = 0;
+    int rows = 0;  //счётчик строк
+    int cols = 0;  //столбцов
 
-    // Подсчет размерности
+    //подсчет размерности
     while (fgets(line, sizeof(line), file)) {
         if (rows == 0) {
-            char *tmp = strdup(line);
-            char *tok = strtok(tmp, ",\n");
+            char *tmp = strdup(line);  //копия строки
+            char *tok = strtok(tmp, ",\n");  //разбиение на токены
             while (tok) { cols++; tok = strtok(NULL, ",\n"); }
             free(tmp);
         }
@@ -55,8 +55,8 @@ Dataset* load_csv(const char *filename, int has_header) {
     fclose(file);
     return d;
 }
-
-void train_test_split(const Dataset *source, Dataset **train, Dataset **test, double train_ratio) {
+//разделение на обучающую и тестовую 
+void train_test_split(const Dataset *source, Dataset **train, Dataset **test, double train_ratio) {  
     if (!source || !train || !test) return;
 
     int train_size = (int)(source->num_rows * train_ratio);
@@ -77,16 +77,16 @@ void train_test_split(const Dataset *source, Dataset **train, Dataset **test, do
     int *indices = (int*)malloc(source->num_rows * sizeof(int));
     for (int i = 0; i < source->num_rows; i++) indices[i] = i;
 
-    // Fisher-Yates Shuffle
-    srand((unsigned int)time(NULL));
-    for (int i = source->num_rows - 1; i > 0; i--) {
+    //алгоритм Фишера-Йейтса
+    srand((unsigned int)time(NULL));  //генерация случ чисел
+    for (int i = source->num_rows - 1; i > 0; i--) {  //получаем случайный индекс
         int j = rand() % (i + 1);
         int temp = indices[i];
         indices[i] = indices[j];
         indices[j] = temp;
     }
 
-    // Распределение данных
+    //распределение данных
     for (int i = 0; i < train_size; i++) {
         int src_idx = indices[i];
         (*train)->features[i] = (double*)malloc(source->num_cols * sizeof(double));

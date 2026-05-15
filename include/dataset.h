@@ -17,7 +17,7 @@ typedef struct {
 } Dataset;
 
 Dataset* load_csv(const char *filename, int has_header);
-void train_test_split(const Dataset *source, Dataset **train, Dataset **test, double train_ratio);
+void train_test_split(const Dataset *source, Dataset **train, Dataset **test, double train_ratio); //разделение данных на обучающую и тестовую 
 void free_dataset(Dataset *data);
 
 #endif // DATASET_H
